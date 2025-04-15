@@ -1,17 +1,17 @@
 {
-  "name": "prayer_time",
+  "name": "prayer_time_mcp",
   "version": "0.1.0",
   "description": "An MCP server to get muslim prayer (aka Salah) times for given date and location",
   "private": true,
   "type": "module",
   "bin": {
-    "prayer_time": "./build/index.js"
+    "prayer_time_mcp": "./build/index.js"
   },
   "files": [
     "build"
   ],
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "build": "tsc && cp src/praytimes.js build/praytimes.js && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"

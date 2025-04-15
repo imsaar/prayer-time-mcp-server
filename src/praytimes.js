@@ -565,5 +565,5 @@ var DMath = {
   }
 }
 
-// Export the PrayTimes function for use in Node.js
-module.exports = PrayTimes;
+// Export the PrayTimes function using ES module syntax
+export default PrayTimes;

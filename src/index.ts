@@ -20,7 +20,8 @@ import {
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const PrayTimes = require('./praytimes.js');
+// Standard ES module default import
+import PrayTimes from './praytimes.js';
 
 /**
  * Type alias for a note object.
@@ -165,6 +166,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: `Created note ${id}: ${title}`
+        }]
+      };
+    }
+
+    case "get_daily_prayer_times": {
+      const latitude = Number(request.params.arguments?.latitude);
+      const longitude = Number(request.params.arguments?.longitude);
+      const dateStr = String(request.params.arguments?.date); // Expecting YYYY-MM-DD
+
+      if (isNaN(latitude) || isNaN(longitude) || !dateStr) {
+        throw new Error("Latitude, longitude, and date are required");
+      }
+
+      // Basic validation for YYYY-MM-DD format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+         throw new Error("Invalid date format. Please use YYYY-MM-DD.");
+      }
+
+      const dateParts = dateStr.split('-').map(Number);
+      const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); // Month is 0-indexed
+
+      if (isNaN(date.getTime())) {
+          throw new Error("Invalid date provided.");
+      }
+
+      // Use 'ISNA' method by default, UTC timezone (0), no DST (0)
+      const prayTimes = new PrayTimes('ISNA');
+      // praytimes.js expects [lat, lon], timezone, dst flag, format
+      const times = prayTimes.getTimes(date, [latitude, longitude], 0, 0, '24h');
+
+      // Format the times into a user-friendly string
+      const timesString = Object.entries(times)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
+
+      return {
+        content: [{
+          type: "text",
+          text: `Prayer times for ${dateStr} at [${latitude}, ${longitude}]:\n${timesString}`
         }]
       };
     }
