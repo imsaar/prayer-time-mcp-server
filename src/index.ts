@@ -191,11 +191,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error("Invalid date provided.");
       }
 
-      // Use 'ISNA' method by default, UTC timezone (0), no DST (0)
-      const prayTimes = new PrayTimes('ISNA');
+      const prayTimes = new PrayTimes('Tehran');
       // praytimes.js expects [lat, lon], timezone, dst flag, format
-      const times = prayTimes.getTimes(date, [latitude, longitude], 0, 0, '24h');
-
+      //const times = prayTimes.getTimes(date, [latitude, longitude], -7, false, '24h');
+      const times = prayTimes.getTimes(date, [latitude, longitude], 'auto', 'auto', '24h');
       // Format the times into a user-friendly string
       const timesString = Object.entries(times)
         .map(([key, value]) => `${key}: ${value}`)
