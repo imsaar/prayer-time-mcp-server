@@ -19,6 +19,9 @@ This is a TypeScript-based MCP server that implements a simple notes system. It 
 - `create_note` - Create new text notes
   - Takes title and content as required parameters
   - Stores note in server state
+- `get_daily_prayer_times` - Get daily prayer times for a specific location
+ - Takes `latitude` (number), `longitude` (number), and `date` (string, YYYY-MM-DD) as required parameters
+ - Returns the calculated prayer times for the given date and location
 
 ### Prompts
 - `summarize_notes` - Generate a summary of all stored notes
