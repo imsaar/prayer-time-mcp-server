@@ -20,6 +20,8 @@ import {
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
+const PrayTimes = require('./praytimes.js');
+
 /**
  * Type alias for a note object.
  */
@@ -116,6 +118,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ["title", "content"]
         }
+      },
+      {
+        name: "get_daily_prayer_times",
+        description: "Get daily prayer times for a specific location",
+        inputSchema: {
+          type: "object",
+          properties: {
+            latitude: {
+              type: "number",
+              description: "Latitude of the location"
+            },
+            longitude: {
+              type: "number",
+              description: "Longitude of the location"
+            },
+            date: {
+              type: "string",
+              description: "Date for which to get prayer times (YYYY-MM-DD)"
+            }
+          },
+          required: ["latitude", "longitude", "date"]
+        } 
       }
     ]
   };
