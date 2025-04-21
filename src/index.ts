@@ -24,20 +24,6 @@ import {
 import PrayTimes from './praytimes.js';
 
 /**
- * Type alias for a note object.
- */
-type Note = { title: string, content: string };
-
-/**
- * Simple in-memory storage for notes.
- * In a real implementation, this would likely be backed by a database.
- */
-const notes: { [id: string]: Note } = {
-  "1": { title: "First Note", content: "This is note 1" },
-  "2": { title: "Second Note", content: "This is note 2" }
-};
-
-/**
  * Create an MCP server with capabilities for resources (to list/read notes),
  * tools (to create new notes), and prompts (to summarize notes).
  */
@@ -56,42 +42,24 @@ const server = new Server(
 );
 
 /**
- * Handler for listing available notes as resources.
- * Each note is exposed as a resource with:
- * - A note:// URI scheme
- * - Plain text MIME type
- * - Human readable name and description (now including the note title)
+ * Handler for listing available resources.
  */
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
-    resources: Object.entries(notes).map(([id, note]) => ({
-      uri: `note:///${id}`,
-      mimeType: "text/plain",
-      name: note.title,
-      description: `A text note: ${note.title}`
-    }))
+    resources: []
   };
 });
 
 /**
- * Handler for reading the contents of a specific note.
- * Takes a note:// URI and returns the note content as plain text.
+ * Handler for reading the contents of a resource.
  */
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const url = new URL(request.params.uri);
   const id = url.pathname.replace(/^\//, '');
-  const note = notes[id];
-
-  if (!note) {
-    throw new Error(`Note ${id} not found`);
-  }
 
   return {
-    contents: [{
-      uri: request.params.uri,
-      mimeType: "text/plain",
-      text: note.content
-    }]
+    contents: [
+    ]
   };
 });
 
@@ -102,24 +70,6 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
-      {
-        name: "create_note",
-        description: "Create a new note",
-        inputSchema: {
-          type: "object",
-          properties: {
-            title: {
-              type: "string",
-              description: "Title of the note"
-            },
-            content: {
-              type: "string",
-              description: "Text content of the note"
-            }
-          },
-          required: ["title", "content"]
-        }
-      },
       {
         name: "get_daily_prayer_times",
         description: "Get daily prayer times for a specific location",
@@ -152,24 +102,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
  */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   switch (request.params.name) {
-    case "create_note": {
-      const title = String(request.params.arguments?.title);
-      const content = String(request.params.arguments?.content);
-      if (!title || !content) {
-        throw new Error("Title and content are required");
-      }
-
-      const id = String(Object.keys(notes).length + 1);
-      notes[id] = { title, content };
-
-      return {
-        content: [{
-          type: "text",
-          text: `Created note ${id}: ${title}`
-        }]
-      };
-    }
-
     case "get_daily_prayer_times": {
       const latitude = Number(request.params.arguments?.latitude);
       const longitude = Number(request.params.arguments?.longitude);
@@ -215,57 +147,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 /**
  * Handler that lists available prompts.
- * Exposes a single "summarize_notes" prompt that summarizes all notes.
  */
 server.setRequestHandler(ListPromptsRequestSchema, async () => {
   return {
     prompts: [
-      {
-        name: "summarize_notes",
-        description: "Summarize all notes",
-      }
     ]
   };
 });
 
 /**
- * Handler for the summarize_notes prompt.
- * Returns a prompt that requests summarization of all notes, with the notes' contents embedded as resources.
+ * Handler for the prompt.
+ * Returns a prompt that requests
  */
 server.setRequestHandler(GetPromptRequestSchema, async (request) => {
-  if (request.params.name !== "summarize_notes") {
-    throw new Error("Unknown prompt");
-  }
-
-  const embeddedNotes = Object.entries(notes).map(([id, note]) => ({
-    type: "resource" as const,
-    resource: {
-      uri: `note:///${id}`,
-      mimeType: "text/plain",
-      text: note.content
-    }
-  }));
-
   return {
     messages: [
-      {
-        role: "user",
-        content: {
-          type: "text",
-          text: "Please summarize the following notes:"
-        }
-      },
-      ...embeddedNotes.map(note => ({
-        role: "user" as const,
-        content: note
-      })),
-      {
-        role: "user",
-        content: {
-          type: "text",
-          text: "Provide a concise summary of all the notes above."
-        }
-      }
     ]
   };
 });
