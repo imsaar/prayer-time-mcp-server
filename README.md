@@ -2,31 +2,12 @@
 
 An MCP server to get muslim prayer (aka Salah) times for given date and location
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
-
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
-
 ## Features
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
-
 ### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
 - `get_daily_prayer_times` - Get daily prayer times for a specific location
  - Takes `latitude` (number), `longitude` (number), and `date` (string, YYYY-MM-DD) as required parameters
  - Returns the calculated prayer times for the given date and location
-
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
 
 ## Development
 
